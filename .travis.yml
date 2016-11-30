@@ -21,7 +21,7 @@ script:
     - cp -v .provisioner.sh bootstrap.sh
     - ln -s /home/travis/build/tempci1216/mk-lab-salt-model /tmp/kitchen
     #- bundle exec rake
-    - bundle exec kitchen verify
+    - bundle exec kitchen verify reclass-mk22-scale
     - find .kitchen -name "*.log" | egrep "$(kitchen list |egrep -v Verified$|awk '{print $1}'|xargs |sed 's/\ /|/g')" | xargs -i{} tail -vn 50 {}
     - bundle exec kitchen list
 
