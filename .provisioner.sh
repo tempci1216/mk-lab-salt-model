@@ -47,7 +47,7 @@ main() {
   which salt-minion salt-master || {
     apt-get update || log_err "APT update failed"
     apt-get clean
-    apt-get -qqq install --allow-change-held-packages --allow-unauthenticated -y salt-master salt-minion python-psutil
+    apt-get -qqq install --allow-unauthenticated -y salt-master salt-minion python-psutil
   }
 
   ## Options
