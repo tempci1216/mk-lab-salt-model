@@ -6,3 +6,24 @@ driver:
   port: <%= ENV["machine_port"] %>
   username: <%= ENV["machine_user"] %>
   password: <%= ENV["machine_pass"] %>
+
+
+platforms:
+  <% `ls nodes/control|xargs -I{} basename {} .yml`.split().each do |cfg| %>
+  <% model=cfg.split('.')[1] %>
+  - name: <%= model %>
+    driver_config:
+      image: ubuntu:16.04
+      platform: ubuntu
+      hostname: <%= cfg %>
+      provision_command:
+        - echo "
+            export MASTER_HOSTNAME=<%= cfg %>;\n
+            export MASTER_INIT_STATES=0;\n
+            export FORMULA_SOURCE=git;\n
+            export FORMULA_BRANCH=master;\n
+            export APT_REPOSITORY_TAGS='main tcp tcp-salt';\n
+          " > kitchen.env
+        - ln -s /tmp/reclass /tmp/kitchen
+  <% end %>
+

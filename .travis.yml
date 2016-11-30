@@ -17,6 +17,7 @@ before_install:
     - sudo usermod -p "`openssl passwd -1 'travis'`" travis
 
 script:
+    - cp -v .provisioner.sh bootstrap.sh
     #- bundle exec rake
     - bundle exec kitchen verify
     - bundle exec kitchen list
