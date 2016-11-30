@@ -24,6 +24,6 @@ platforms:
             export FORMULA_BRANCH=master;\n
             export APT_REPOSITORY_TAGS='main tcp tcp-salt';\n
           " > kitchen.env
-        - ln -s /tmp/reclass /tmp/kitchen
+        - ln -s /tmp/reclass /tmp/kitchen || echo "may fail"
   <% end %>
 
