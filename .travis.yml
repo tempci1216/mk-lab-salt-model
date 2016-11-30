@@ -17,15 +17,14 @@ before_install:
     - sudo usermod -p "`openssl passwd -1 'travis'`" travis
 
 script:
+    - pwd
     - cp -v .provisioner.sh bootstrap.sh
-    - ls -lR .
-    - sudo find / |egrep provisioner.sh
-    - ls -lR . |egrep provisioner.sh
+    - ln -s /home/travis/build/tempci1216/mk-lab-salt-model /tmp/kitchen
     #- bundle exec rake
     - bundle exec kitchen verify
     - find .kitchen -name "*.log" | egrep "$(kitchen list |egrep -v Verified$|awk '{print $1}'|xargs |sed 's/\ /|/g')" | xargs -i{} tail -vn 50 {}
     - bundle exec kitchen list
 
 branches:
-    only:
-        - new_model+ci
+  only:
+    - new_model+ci
