@@ -25,8 +25,6 @@ platforms:
             export APT_REPOSITORY_TAGS='main tcp tcp-salt';\n
           " > kitchen.env
         - ln -s /tmp/reclass /tmp/kitchen || echo "may fail"
-        - find /
-        - find / |egrep provisioner.sh
         - pwd
   <% end %>
 
