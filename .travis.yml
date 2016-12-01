@@ -1,30 +1,34 @@
 language: ruby
 
-env:
-  global:
-    - machine_user=travis
-    - machine_pass=travis
-    - machine_port=22
-    - KITCHEN_LOCAL_YAML=.kitchen.travis.yml
-
 rvm:
-    - 2.1.7
+#  - 2.1.8
+  - 2.2.4
+#  - ruby-head
 
-sudo: required
-dist: trusty
+#matrix:
+#  allow_failures:
+#    - rvm: ruby-head
 
-before_install:
-    - sudo usermod -p "`openssl passwd -1 'travis'`" travis
+sudo: true
+
+bundler_args: --without='vagrant'
+
+install:
+  # init/start docker in travis
+  - source <(curl -sL https://raw.githubusercontent.com/zuazo/kitchen-in-travis/master/scripts/start_docker.sh)
+  # clone & setup ci for test formula
+  - bundle exec gem install test-kitchen
+  - bundle exec gem install kitchen-docker
+  - KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen list
 
 script:
-    - pwd
-    - cp -v .provisioner.sh bootstrap.sh
-    - ln -s /home/travis/build/tempci1216/mk-lab-salt-model /tmp/kitchen
-    #- bundle exec rake
-    - bundle exec kitchen verify reclass-mk22-scale
-    - find .kitchen -name "*.log" | egrep "$(kitchen list |egrep -v Verified$|awk '{print $1}'|xargs |sed 's/\ /|/g')" | xargs -i{} tail -vn 50 {}
-    - bundle exec kitchen list
+  - export KITCHEN_LOCAL_YAML=.kitchen.travis.yml
+  - KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen verify reclass-mk22-scale
 
-branches:
-  only:
-    - new_model+ci
+after_script:
+  - KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen list
+  - KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen destroy all
+  #- KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen diagnose --all
+
+after_failure: cat docker_daemon.log
+
