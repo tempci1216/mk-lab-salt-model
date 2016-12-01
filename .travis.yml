@@ -17,7 +17,9 @@ install:
   # init/start docker in travis
   - source <(curl -sL https://raw.githubusercontent.com/zuazo/kitchen-in-travis/master/scripts/start_docker.sh)
   # clone & setup ci for test formula
-  - bundle install
+  #- bundle install
+  - gem install test-kitchen
+  - gem install kitchen-docker
   #- bundle exec gem install test-kitchen
   #- bundle exec gem install kitchen-docker
   - KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen list
