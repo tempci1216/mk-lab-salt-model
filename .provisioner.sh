@@ -44,8 +44,6 @@ log_err() {
 #trap _atexit INT TERM EXIT
 main() {
 
-  env
-
   which salt-minion salt-master || {
     apt-get update || log_err "APT update failed"
     apt-get clean
@@ -86,9 +84,6 @@ main() {
   export RECLASS_ADDRESS=${RECLASS_ADDRESS:-$(git remote get-url origin)}
   #HOSTNAME=$(${MASTER_HOSTNAME} | awk -F. '{print $1}')
   #DOMAIN=$(${MASTER_HOSTNAME}   | awk -F. '{print $ARGV[1..]}')
-  HOSTNAME=cfg01
-  DOMAIN=mk22-scale.mirantis.local
-  MASTER_HOSTNAME=cfg01.mk22-scale.mirantis.local
   test -e bootstrap.sh || \
     curl -skL "https://raw.githubusercontent.com/tcpcloud/salt-bootstrap-test/master/bootstrap.sh" > bootstrap.sh; chmod +x *.sh;
   test -e bootstrap.sh.lock || \
