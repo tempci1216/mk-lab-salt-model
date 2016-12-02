@@ -3,11 +3,9 @@
 # generate and validate reclass-salt-model
 # expected to be executed in isolated environment, ie: docker
 
-export LC_ALL=C
-
-set -e
+set -x
 if [[ $DEBUG =~ ^(True|true|1|yes)$ ]]; then
-    set -x
+  set -x
 fi
 
 # source .kitchen.env and possibly others
@@ -44,10 +42,14 @@ log_err() {
 #trap _atexit INT TERM EXIT
 main() {
 
+  export LC_ALL=C
+
+  set -e
+
   which salt-minion salt-master || {
     apt-get update || log_err "APT update failed"
     apt-get clean
-    apt-get -qqq install --allow-unauthenticated -y salt-master salt-minion python-psutil
+    apt-get -qqq install --allow-change-held-packages --allow-unauthenticated -y salt-master salt-minion python-psutil
   }
 
   ## Options
@@ -70,10 +72,8 @@ main() {
     #test -e /srv/salt/reclass/.git && git pull -r || git clone /tmp/reclass /srv/salt/reclass
   #} || {
     log_info ".. as static folders"
-    cp -fa /tmp/reclass/scripts /srv/salt/reclass || echo "X"
-    cp -fa /tmp/reclass/classes /srv/salt/reclass || echo "X"
-    cp -fa /tmp/reclass/nodes /srv/salt/reclass || echo "X"
-    cp -fa /tmp/reclass/.git /srv/salt/reclass || echo "X"
+    rsync -avh --exclude workspace --exclude tmp --exclude temp \
+      /tmp/reclass /srv/salt/
   #}
 
 
@@ -100,15 +100,16 @@ main() {
   service salt-master restart
   service salt-minion restart
   sleep 10
+}
 
-
-  # Init salt master
+# Init salt master
+init_salt_master() {
   log_info "Runing saltmaster states"
   salt-call saltutil.sync_all
   if [[ $MASTER_INIT_STATES =~ ^(True|true|1|yes)$ ]]; then
-    salt-call ${SALT_OPTS} state.sls salt.master || log_err "Some states may fail"
+    salt-call ${SALT_OPTS} state.sls salt.master
   else
-    salt-call ${SALT_OPTS} state.sls salt.master.env || log_err "Some states may fail"
+    salt-call ${SALT_OPTS} state.sls salt.master.env
     salt-call ${SALT_OPTS} state.sls salt.master.pillar   pillar='{"reclass":{"storage":{"enabled":"False"}}}'
                                                           # sikp reclass data dir states
                                                           # in order to avoid pull from configured repo/branch
@@ -120,8 +121,8 @@ main() {
 
   # Instantinate Salt Master
   if [[ $MASTER_INIT_STATES =~ ^(True|true|1|yes)$ ]]; then
-  #  salt-call ${SALT_OPTS} state.sls reclass || log_err "Some states may fail"
-    salt-call ${SALT_OPTS} state.sls salt || log_err "Some states may fail"
+  #  salt-call ${SALT_OPTS} state.sls reclass
+    salt-call ${SALT_OPTS} state.sls salt
     sed -i 's/^master:.*/master: localhost/' /etc/salt/minion.d/minion.conf
   fi
 }
@@ -154,6 +155,7 @@ function verify_salt_minions() {
 # detect if file is being sourced
 [[ "$0" != "$BASH_SOURCE"  ]] || {
   main
+  init_salt_master
   verify_salt_master
   verify_salt_minions
 }
