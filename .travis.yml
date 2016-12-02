@@ -26,9 +26,11 @@ install:
 
 script:
   #- export KITCHEN_LOCAL_YAML=.kitchen.travis.yml
-  - DEBUG=true bundle exec kitchen converge reclass-mk22-scale -ldebug
+  - watch who &
+  - set -x
   - DEBUG=true bundle exec sudo kitchen verify reclass-mk22-scale -ldebug
   - DEBUG=true sudo bundle exec kitchen verify reclass-mk22-scale -ldebug
+  - DEBUG=true bundle exec kitchen converge reclass-mk22-scale -ldebug
 
 after_script:
   - bundle exec kitchen list

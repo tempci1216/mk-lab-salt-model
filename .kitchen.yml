@@ -6,6 +6,7 @@ driver:
   #<#%= ENV['SALT_MODEL_DOMAIN'] || `grep domain_name cookiecutter.json |awk -F'"' '{print $4}'` %>
   volume:
     - <%= ENV['PWD'] %>:/tmp/reclass
+  log_level: debug
 
 platforms:
   <% `ls nodes/control|xargs -I{} basename {} .yml`.split().each do |cfg| %>
